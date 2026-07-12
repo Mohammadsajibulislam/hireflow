@@ -1,17 +1,19 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { MapPin, Clock, Bookmark } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 import type { JobDocument } from "@/types/job";
 
 interface JobCardProps {
   job: JobDocument;
 }
 
-// সংখ্যাকে "80K" এর মতো সংক্ষিপ্ত ফরম্যাটে দেখানোর জন্য utility function
 function formatSalary(amount: number): string {
   return amount >= 1000 ? `${Math.round(amount / 1000)}K` : `${amount}`;
 }
 
-// কতদিন আগে পোস্ট হয়েছে, সেটা মানুষের পড়ার মতো ফরম্যাটে দেখানো
 function timeAgo(date: Date): string {
   const diffMs = Date.now() - new Date(date).getTime();
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
@@ -23,13 +25,53 @@ function timeAgo(date: Date): string {
 }
 
 export default function JobCard({ job }: JobCardProps) {
+  const { data: session } = authClient.useSession();
+  const jobId = job._id?.toString();
+
+  const [isSaved, setIsSaved] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
+
+  // পেজ লোড হওয়ার সময় এই জবটা আগে থেকেই saved কিনা চেক করা
+  useEffect(() => {
+    if (!session?.user?.id || !jobId) return;
+
+    fetch(`/api/saved-jobs?userId=${session.user.id}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success) {
+          const saved = json.data.some((j: JobDocument) => j._id?.toString() === jobId);
+          setIsSaved(saved);
+        }
+      });
+  }, [session?.user?.id, jobId]);
+
+  const handleToggleSave = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Link এর ভিতরে বাটন থাকায়, ক্লিক করলে যাতে Details পেজে চলে না যায়
+    e.stopPropagation();
+
+    if (!session?.user?.id) {
+      // লগইন না থাকলে সরাসরি লগইন পেজে পাঠানো যেতে পারতো, কিন্তু আপাতত সহজভাবে কিছু না করাই রাখছি
+      return;
+    }
+
+    setIsToggling(true);
+    const res = await fetch("/api/saved-jobs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: session.user.id, jobId }),
+    });
+    const json = await res.json();
+    if (json.success) setIsSaved(json.saved);
+    setIsToggling(false);
+  };
+
   return (
-    <Link href={`/jobs/${job._id?.toString()}`}
+    <Link
+      href={`/jobs/${jobId}`}
       className="block rounded-card border border-neutral-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          {/* কোম্পানির initial ব্যাজ — TopCompanies.tsx তে ব্যবহৃত একই প্যাটার্ন */}
           <span
             className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white ${job.companyColor}`}
           >
@@ -41,13 +83,14 @@ export default function JobCard({ job }: JobCardProps) {
           </div>
         </div>
 
-        {/* Bookmark বাটন — এখন শুধু UI, Phase 7 এ কার্যকর করা হবে */}
         <button
           type="button"
-          aria-label="Save job"
-          className="text-neutral-400 transition-colors hover:text-primary-500"
+          onClick={handleToggleSave}
+          disabled={isToggling}
+          aria-label={isSaved ? "Unsave job" : "Save job"}
+          className={`transition-colors ${isSaved ? "text-primary-500" : "text-neutral-400 hover:text-primary-500"}`}
         >
-          <Bookmark size={18} />
+          <Bookmark size={18} fill={isSaved ? "currentColor" : "none"} />
         </button>
       </div>
 

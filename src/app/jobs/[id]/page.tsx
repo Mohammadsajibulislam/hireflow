@@ -5,15 +5,22 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { MapPin, Clock, Briefcase, DollarSign, Bookmark, Share2 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
+import { authClient } from "@/lib/auth-client";
 import type { JobDocument } from "@/types/job";
 
 export default function JobDetailsPage() {
   const params = useParams<{ id: string }>();
+  const { data: session } = authClient.useSession();
 
   const [job, setJob] = useState<JobDocument | null>(null);
   const [related, setRelated] = useState<JobDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+
+  // Apply সংক্রান্ত state
+  const [hasApplied, setHasApplied] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
+  const [applyMessage, setApplyMessage] = useState("");
 
   useEffect(() => {
     async function fetchJob() {
@@ -23,15 +30,61 @@ export default function JobDetailsPage() {
 
       if (!json.success) {
         setNotFound(true);
-      } else {
-        setJob(json.data);
-        setRelated(json.related);
+        setIsLoading(false);
+        return;
       }
+
+      setJob(json.data);
+      setRelated(json.related);
+
+      // এই ইউজার আগেই apply করেছে কিনা চেক করা (যদি লগইন থাকে)
+      if (session?.user?.id) {
+        const appRes = await fetch(`/api/applications?userId=${session.user.id}`);
+        const appJson = await appRes.json();
+        if (appJson.success) {
+          const applied = appJson.data.some((app: { jobId: string }) => app.jobId === params.id);
+          setHasApplied(applied);
+        }
+      }
+
       setIsLoading(false);
     }
 
     fetchJob();
-  }, [params.id]);
+  }, [params.id, session?.user?.id]);
+
+  const handleApply = async () => {
+    if (!session?.user) {
+      setApplyMessage("Please login to apply for this job");
+      return;
+    }
+    if (!job) return;
+
+    setIsApplying(true);
+    setApplyMessage("");
+
+    const res = await fetch("/api/applications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: session.user.id,
+        jobId: params.id,
+        jobTitle: job.title,
+        company: job.company,
+      }),
+    });
+    const json = await res.json();
+
+    setIsApplying(false);
+
+    if (!json.success) {
+      setApplyMessage(json.error || "Failed to apply");
+      return;
+    }
+
+    setHasApplied(true);
+    setApplyMessage("Application submitted successfully!");
+  };
 
   if (isLoading) {
     return (
@@ -61,7 +114,7 @@ export default function JobDetailsPage() {
       <Navbar />
       <main className="bg-neutral-50 py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* হেডার ব্যানার — মকআপে দেখা primary কালারের ব্যানার */}
+          {/* হেডার ব্যানার */}
           <div className="rounded-card bg-primary-600 p-6 text-white sm:p-8">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
               <div className="flex items-center gap-4">
@@ -87,16 +140,25 @@ export default function JobDetailsPage() {
                 </div>
               </div>
 
-              <div className="flex shrink-0 gap-2">
-                <button className="rounded-lg bg-white px-6 py-2.5 text-sm font-semibold text-primary-600 transition-colors hover:bg-primary-50">
-                  Apply Now
-                </button>
-                <button
-                  aria-label="Save job"
-                  className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 text-white transition-colors hover:bg-white/20"
-                >
-                  <Bookmark size={18} />
-                </button>
+              <div className="flex shrink-0 flex-col items-end gap-2">
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleApply}
+                    disabled={hasApplied || isApplying}
+                    className="rounded-lg bg-white px-6 py-2.5 text-sm font-semibold text-primary-600 transition-colors hover:bg-primary-50 disabled:opacity-60"
+                  >
+                    {hasApplied ? "Applied ✓" : isApplying ? "Applying..." : "Apply Now"}
+                  </button>
+                  <button
+                    aria-label="Save job"
+                    className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 text-white transition-colors hover:bg-white/20"
+                  >
+                    <Bookmark size={18} />
+                  </button>
+                </div>
+                {applyMessage && (
+                  <p className={`text-xs ${hasApplied ? "text-accent-100" : "text-red-100"}`}>{applyMessage}</p>
+                )}
               </div>
             </div>
           </div>
@@ -104,13 +166,11 @@ export default function JobDetailsPage() {
           <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
             {/* বাম পাশ — বিস্তারিত বর্ণনা */}
             <div className="space-y-6 lg:col-span-2">
-              {/* Overview / Description */}
               <section className="rounded-card border border-neutral-200 bg-white p-6">
                 <h2 className="font-semibold text-neutral-900">Job Description</h2>
                 <p className="mt-3 text-sm leading-relaxed text-neutral-600">{job.description}</p>
               </section>
 
-              {/* Key info / Responsibilities */}
               <section className="rounded-card border border-neutral-200 bg-white p-6">
                 <h2 className="font-semibold text-neutral-900">Responsibilities</h2>
                 <ul className="mt-3 space-y-2">
@@ -123,7 +183,6 @@ export default function JobDetailsPage() {
                 </ul>
               </section>
 
-              {/* Requirements / Specifications */}
               <section className="rounded-card border border-neutral-200 bg-white p-6">
                 <h2 className="font-semibold text-neutral-900">Requirements</h2>
                 <ul className="mt-3 space-y-2">
@@ -137,7 +196,7 @@ export default function JobDetailsPage() {
               </section>
             </div>
 
-            {/* ডান পাশ — Job Details কার্ড + Share */}
+            {/* ডান পাশ */}
             <div className="space-y-6">
               <section className="rounded-card border border-neutral-200 bg-white p-6">
                 <h2 className="font-semibold text-neutral-900">Job Details</h2>
@@ -172,15 +231,14 @@ export default function JobDetailsPage() {
                 </p>
               </section>
 
-              {/* Related Jobs */}
               {related.length > 0 && (
                 <section className="rounded-card border border-neutral-200 bg-white p-6">
                   <h2 className="font-semibold text-neutral-900">Similar Jobs</h2>
                   <div className="mt-4 space-y-3">
                     {related.map((r) => (
-  <Link
-    key={r._id?.toString()}
-    href={`/jobs/${r._id?.toString()}`}
+                      <Link
+                        key={r._id?.toString()}
+                        href={`/jobs/${r._id?.toString()}`}
                         className="block rounded-lg border border-neutral-100 p-3 transition-colors hover:border-primary-200 hover:bg-primary-50"
                       >
                         <p className="text-sm font-medium text-neutral-900">{r.title}</p>
