@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import Footer from "@/components/layout/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "HireFlow",
-  description: "Find your dream job",
+  title: "HireFlow — Find Your Dream Job",
+  description: "Discover thousands of job opportunities with HireFlow.",
 };
 
 export default function RootLayout({
@@ -13,7 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Footer />
+      </body>
     </html>
   );
 }

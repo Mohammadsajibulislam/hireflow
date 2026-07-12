@@ -5,6 +5,7 @@ import JobCategories from "@/components/sections/JobCategories";
 import TopCompanies from "@/components/sections/TopCompanies";
 import Statistics from "@/components/sections/Statistics";
 import Testimonials from "@/components/sections/Testimonials";
+import Newsletter from "@/components/sections/Newsletter";
 
 export default function HomePage() {
   return (
@@ -16,6 +17,7 @@ export default function HomePage() {
       <TopCompanies />
       <Statistics />
       <Testimonials />
+      <Newsletter />
     </main>
   );
 }
