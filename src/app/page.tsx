@@ -3,6 +3,7 @@ import Hero from "@/components/sections/Hero";
 import WhyChooseUs from "@/components/sections/WhyChooseUs";
 import JobCategories from "@/components/sections/JobCategories";
 import TopCompanies from "@/components/sections/TopCompanies";
+import Statistics from "@/components/sections/Statistics";
 
 export default function HomePage() {
   return (
@@ -12,6 +13,7 @@ export default function HomePage() {
       <WhyChooseUs />
       <JobCategories />
       <TopCompanies />
+      <Statistics />
     </main>
   );
 }
