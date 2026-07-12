@@ -4,6 +4,7 @@ import WhyChooseUs from "@/components/sections/WhyChooseUs";
 import JobCategories from "@/components/sections/JobCategories";
 import TopCompanies from "@/components/sections/TopCompanies";
 import Statistics from "@/components/sections/Statistics";
+import Testimonials from "@/components/sections/Testimonials";
 
 export default function HomePage() {
   return (
@@ -14,6 +15,7 @@ export default function HomePage() {
       <JobCategories />
       <TopCompanies />
       <Statistics />
+      <Testimonials />
     </main>
   );
 }
