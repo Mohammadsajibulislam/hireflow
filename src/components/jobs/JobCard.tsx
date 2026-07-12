@@ -24,8 +24,7 @@ function timeAgo(date: Date): string {
 
 export default function JobCard({ job }: JobCardProps) {
   return (
-    <Link
-      href={`/jobs/${job._id}`}
+    <Link href={`/jobs/${job._id?.toString()}`}
       className="block rounded-card border border-neutral-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-3">

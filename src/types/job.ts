@@ -1,14 +1,16 @@
+import type { ObjectId } from "mongodb";
+
 export type JobType = "Full Time" | "Part Time" | "Contract" | "Internship" | "Remote";
 export type ExperienceLevel = "Entry Level" | "Mid Level" | "Senior Level";
 
 export interface JobDocument {
-  _id?: string;
+  _id?: ObjectId; // string এর বদলে ObjectId — MongoDB এর আসল টাইপের সাথে মিলিয়ে
   title: string;
   company: string;
   companyInitial: string;
   companyColor: string;
   location: string;
-  category: string; // Development, Design, Marketing ইত্যাদি
+  category: string;
   jobType: JobType;
   experienceLevel: ExperienceLevel;
   salaryMin: number;
@@ -16,11 +18,10 @@ export interface JobDocument {
   description: string;
   responsibilities: string[];
   requirements: string[];
-  postedBy: string; // recruiter এর userId (Better-Auth session থেকে আসবে)
+  postedBy: string;
   createdAt: Date;
 }
 
-// Add Job ফর্ম থেকে যা আসবে (Requirement সেকশন ৮: Title, description, price/date/priority, image)
 export interface CreateJobInput {
   title: string;
   company: string;

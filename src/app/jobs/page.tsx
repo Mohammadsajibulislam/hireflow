@@ -181,7 +181,7 @@ export default function BrowseJobsPage() {
                     No jobs found matching your criteria.
                   </p>
                 ) : (
-                  jobs.map((job) => <JobCard key={job._id} job={job} />)
+                  jobs.map((job) => <JobCard key={job._id?.toString()} job={job} />)
                 )}
               </div>
 
