@@ -69,7 +69,7 @@ export default function Hero() {
           <div className="relative aspect-square w-full max-w-md overflow-hidden rounded-3xl bg-primary-50">
             {/* এখানে আসল ছবি বসবে — উদাহরণ হিসেবে placeholder */}
             <img
-              src="/hero-image.jpg"
+              src="/hero-image.png"
               alt="Person working on laptop"
               className="h-full w-full object-cover"
             />

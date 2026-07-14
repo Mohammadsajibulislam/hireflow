@@ -9,6 +9,7 @@ import { authClient } from "@/lib/auth-client";
 // Demo credentials — submission এর সময় evaluator এই দিয়ে সহজে টেস্ট করতে পারবে
 const demoAccounts = {
   candidate: { email: "candidate@hireflow.demo", password: "demo1234" },
+  recruiter: { email: "recruiter@hireflow.demo", password: "demo1234" },
   admin: { email: "admin@hireflow.demo", password: "demo1234" },
 };
 
@@ -44,11 +45,9 @@ export default function LoginPage() {
     }
 
     router.push("/");
-    router.refresh(); // Navbar এর session state আপডেট করার জন্য (Phase পরে এটা বুঝবো)
+    router.refresh();
   };
 
-  // Demo বাটনে ক্লিক করলে ইনপুট ফিল্ড auto-fill হবে, কিন্তু লগইন সাবমিট হবে না —
-  // ইউজার নিজে চোখে দেখে বুঝতে পারবে কী বসলো, তারপর নিজে Login বাটনে চাপবে
   const fillDemoCredentials = (type: keyof typeof demoAccounts) => {
     setEmail(demoAccounts[type].email);
     setPassword(demoAccounts[type].password);
@@ -68,21 +67,28 @@ export default function LoginPage() {
         <h1 className="mt-6 text-center text-2xl font-bold text-neutral-900">Welcome back</h1>
         <p className="mt-1 text-center text-sm text-neutral-600">Login to continue to your account</p>
 
-        {/* Demo login বাটন — Requirement: "Demo login button (auto-fill credentials)" */}
-        <div className="mt-6 grid grid-cols-2 gap-2">
+        {/* Demo login বাটন — এখন ৩টা: Candidate, Recruiter, Admin */}
+        <div className="mt-6 grid grid-cols-3 gap-2">
           <button
             type="button"
             onClick={() => fillDemoCredentials("candidate")}
-            className="rounded-lg border border-neutral-200 px-3 py-2 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-100"
+            className="rounded-lg border border-neutral-200 px-2 py-2 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-100"
           >
-            Fill Candidate Demo
+            Candidate Demo
+          </button>
+          <button
+            type="button"
+            onClick={() => fillDemoCredentials("recruiter")}
+            className="rounded-lg border border-neutral-200 px-2 py-2 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-100"
+          >
+            Recruiter Demo
           </button>
           <button
             type="button"
             onClick={() => fillDemoCredentials("admin")}
-            className="rounded-lg border border-neutral-200 px-3 py-2 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-100"
+            className="rounded-lg border border-neutral-200 px-2 py-2 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-100"
           >
-            Fill Admin Demo
+            Admin Demo
           </button>
         </div>
 
