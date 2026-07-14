@@ -1,36 +1,133 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HireFlow
+
+HireFlow is a modern job platform built with Next.js (App Router), React, Tailwind CSS, and MongoDB. It includes candidate and recruiter authentication, job browsing, saved jobs, and job applications.
+
+## Live Site
+
+**Live demo: [https://hireflow-two-omega.vercel.app](https://hireflow-two-omega.vercel.app)**
+
+## Key Features
+
+- Responsive landing page with hero, job categories, company showcase, testimonials, and newsletter sections.
+- User authentication with `better-auth` using email/password and JWT session caching.
+- MongoDB-backed API routes for jobs, applications, and saved jobs.
+- Job search, filtering, sorting, and pagination.
+- Demo login support for candidate, recruiter, and admin roles.
+- Seed scripts for admin, recruiter, and sample job data.
+
+## Technologies
+
+- Next.js 16
+- React 19
+- Tailwind CSS 4
+- MongoDB
+- better-auth
+- lucide-react
+- react-icons
+- recharts
+- TypeScript
+- ESLint
+- Vercel
 
 ## Getting Started
 
-First, run the development server:
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Environment variables
+
+Create a `.env.local` file in the project root and add:
+
+```env
+MONGODB_URI=your-mongodb-connection-string
+BETTER_AUTH_SECRET=your-secret-key
+BETTER_AUTH_URL=http://localhost:3000
+NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3000
+```
+
+- `MONGODB_URI` is required for MongoDB access.
+- `BETTER_AUTH_SECRET` is required for better-auth JWT session signing.
+- `BETTER_AUTH_URL` and `NEXT_PUBLIC_BETTER_AUTH_URL` should match your app URL.
+
+### Run the app
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build for production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Seed Data
 
-To learn more about Next.js, take a look at the following resources:
+The project includes seed scripts in the `scripts/` folder.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `scripts/seedAdmin.ts` — creates an admin user
+- `scripts/seedRecruiter.ts` — creates a demo recruiter
+- `scripts/seedJobs.ts` — adds sample job listings
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Run these scripts with your preferred TypeScript runner, for example:
 
-## Deploy on Vercel
+```bash
+npx tsx scripts/seedAdmin.ts
+npx tsx scripts/seedRecruiter.ts
+npx tsx scripts/seedJobs.ts
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+If you don't have `tsx`, install it first:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm install -D tsx
+```
+
+## Demo Accounts
+
+The login page includes demo credentials for quick testing:
+
+- Candidate: `candidate@hireflow.demo` / `demo1234`
+- Recruiter: `recruiter@hireflow.demo` / `demo1234`
+- Admin: `admin@hireflow.demo` / `demo1234`
+
+## App Pages
+
+- `/` — Landing page with product sections
+- `/login` — Login page
+- `/register` — Registration page
+- `/jobs` — Job listing page
+- `/jobs/[id]` — Job details page
+- `/companies` — Company listing page
+- `/contact`, `/about`, `/pricing`, `/privacy` — informational pages
+- `/dashboard` and `/admin` — role-specific pages
+
+## API Routes
+
+- `GET /api/jobs` — fetch jobs with search, category, job type, sort, and pagination
+- `POST /api/jobs` — add a new job
+- `GET /api/applications` — fetch applications for a user
+- `POST /api/applications` — submit a job application
+- `GET /api/saved-jobs` — fetch saved jobs for a user
+- `POST /api/saved-jobs` — save or unsave a job
+
+## Project Structure
+
+- `src/app/` — Next.js pages and API routes
+- `src/components/` — UI components
+- `src/hooks/` — custom hooks
+- `src/lib/` — MongoDB and auth helpers
+- `src/types/` — TypeScript types
+- `scripts/` — data seeding scripts
+
+## Notes
+
+- Authentication is handled by `better-auth` with a MongoDB adapter.
+- Jobs are stored in the `jobs` collection, applications in `applications`, and saved jobs in `savedJobs`.
+- Use the seed scripts first to populate demo users and jobs.

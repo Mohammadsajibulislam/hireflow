@@ -40,7 +40,7 @@ export default function LoginPage() {
     setIsLoading(false);
 
     if (signInError) {
-      setError("ভুল ইমেইল অথবা পাসওয়ার্ড");
+      setError("Wrong email or password. Please try again.");
       return;
     }
 
