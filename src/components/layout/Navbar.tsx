@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Briefcase, Menu, X, LayoutDashboard, PlusCircle, LogOut } from "lucide-react";
+import { Briefcase, Menu, X, LogOut } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import type { NavItem } from "@/types/nav";
 
@@ -16,7 +16,6 @@ const loggedOutLinks: NavItem[] = [
   { label: "Contact", href: "/contact" },
 ];
 
-// লগইন থাকলে সবার জন্য কমন লিংক
 const loggedInBaseLinks: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "Jobs", href: "/jobs" },
@@ -27,7 +26,6 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
 
-  // Better-Auth এর client-side hook — session state (loading/logged-in/logged-out) দেয়
   const { data: session, isPending } = authClient.useSession();
 
   const handleLogout = async () => {
@@ -36,10 +34,9 @@ export default function Navbar() {
     router.refresh();
   };
 
-  // session.user এ আমাদের কাস্টম "role" ফিল্ড আছে (inferAdditionalFields প্লাগিনের কারণে টাইপ চেনে)
   const role = session?.user?.role as "candidate" | "recruiter" | "admin" | undefined;
 
-  // role অনুযায়ী dashboard/manage লিংক আলাদা হবে — এভাবেই authorization পার্থক্য UI তে প্রতিফলিত হয়
+  // প্রতিটা role এ কমপক্ষে ৫টা রুট নিশ্চিত করা হচ্ছে (৩টা base + ২টা role-specific)
   const roleBasedLinks: NavItem[] =
     role === "recruiter"
       ? [
@@ -47,8 +44,14 @@ export default function Navbar() {
           { label: "Manage Jobs", href: "/items/manage" },
         ]
       : role === "admin"
-        ? [{ label: "Admin Dashboard", href: "/admin" }]
-        : [{ label: "My Applications", href: "/dashboard" }];
+        ? [
+            { label: "Admin Dashboard", href: "/admin" },
+            { label: "Manage Jobs", href: "/items/manage" }, // admin এরও manage-jobs এ অ্যাক্সেস আছে (useRequireAuth এ allowedRoles তে admin আছে)
+          ]
+        : [
+            { label: "Dashboard", href: "/dashboard" },
+            { label: "Blog", href: "/blog" },
+          ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-white">
@@ -60,8 +63,7 @@ export default function Navbar() {
           HireFlow
         </Link>
 
-        {/* ডেস্কটপ নেভিগেশন */}
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-6 md:flex">
           {(session ? loggedInBaseLinks : loggedOutLinks).map((item) => (
             <Link
               key={item.href}
@@ -83,10 +85,8 @@ export default function Navbar() {
             ))}
         </nav>
 
-        {/* ডেস্কটপ ডানপাশ — session অনুযায়ী ভিন্ন UI */}
         <div className="hidden items-center gap-3 md:flex">
           {isPending ? (
-            // session লোড হওয়ার সময় একটা হালকা placeholder — layout shift এড়ানোর জন্য
             <div className="h-9 w-24 animate-pulse rounded-lg bg-neutral-100" />
           ) : session ? (
             <div className="flex items-center gap-3">
@@ -128,7 +128,6 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* মোবাইল ড্রপডাউন */}
       {isMenuOpen && (
         <div className="border-t border-neutral-200 bg-white px-4 py-4 md:hidden">
           <nav className="flex flex-col gap-4">

@@ -14,6 +14,15 @@ export const auth = betterAuth({
     minPasswordLength: 6,
   },
 
+  // Requirement: "MongoDB with JWT" — session কে JWT ফরম্যাটে সাইন করা হচ্ছে
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 60, // ১ ঘণ্টা cache
+      strategy: "jwt",
+    },
+  },
+
   user: {
     additionalFields: {
       role: {
